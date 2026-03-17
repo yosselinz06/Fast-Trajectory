@@ -3,6 +3,7 @@
 import pygame
 import random
 from Astar import a_star #import function a_star from Astar.py
+from Menu import menu
 import sys
 sys.setrecursionlimit(100000) #extend recursion depth
 
@@ -137,6 +138,7 @@ def draw_grid(screen, grid):
             node.draw(screen)
     pygame.display.flip()
 
+
 if __name__ == "__main__":
 
     # This creates the screen. pygame.draw uses this as a canvas - Jason S
@@ -149,35 +151,34 @@ if __name__ == "__main__":
     grid = create_grid()
     create_grid_dfs(grid)
 
+    option = menu()
     # Run astar - put this before running - Jason S
-    start = grid[0][0]
-    start.color = BLUE
-    start.is_obstacle = False
+    if option == 1:
+        start = grid[0][0]
+        start.color = BLUE
+        start.is_obstacle = False
 
-    end = grid[ROWS - 1][COLS - 1]
-    end.color = GREEN
-    end.is_obstacle = False
+        end = grid[ROWS - 1][COLS - 1]
+        end.color = GREEN
+        end.is_obstacle = False
 
-    for row in grid:
-        for node in row:
-            node.update_neighbors(grid)
+        for row in grid:
+            for node in row:
+                node.update_neighbors(grid)
 
-    found = a_star(grid, start, end)
+        found = a_star(grid, start, end)
 
-    if not found:
-        print("No Path. Impossible maze")
+        if not found:
+            print("No Path. Impossible maze")
 
-    while running:
-        #screen.fill(WHITE)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-        draw_grid(screen,grid)
-        clock.tick(60)
-
-
-
-    pygame.quit()
+        while running:
+            #screen.fill(WHITE)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+            draw_grid(screen,grid)
+            clock.tick(60)
+        pygame.quit()
 
 
 

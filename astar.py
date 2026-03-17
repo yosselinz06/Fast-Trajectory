@@ -1,6 +1,6 @@
-import pygame
+#import pygame
 import heapq
-
+'''
 # Grid settings
 ROWS = 5
 COLS = 5
@@ -14,13 +14,16 @@ BLUE  = (0,0,255)
 GREEN = (0,255,0)
 RED   = (255,0,0)
 GOLD  = (255,215,0)
-
+'''
+'''
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, WIDTH))
 pygame.display.set_caption("Simple A* Demo")
 font = pygame.font.SysFont(None,20)
+'''
 
 # Node
+'''
 class Node:
     def __init__(self,row,col):
         self.row = row
@@ -53,35 +56,44 @@ class Node:
     def __lt__(self,other):
         return self.f < other.f
 
+'''
 
+RED = (255,0,0)
+GOLD = (255,215,0)
 # Heuristic
 def h(a,b):
     return abs(a.row - b.row) + abs(a.col - b.col)
 
+# Added Code here -------------------
+def reset_grid(grid):
+    for row in grid:
+        for node in row:
+            node.g = float("inf")
+            node.f = float("inf")
+            node.h=0
+            node.parent=None
+# -----------------------------------
+
 
 # Path reconstruction
 def reconstruct_path(start,end):
-    current = end
+    current = end.parent # Added .parent
     while current.parent and current != start:
-        current = current.parent
         current.color = GOLD
+        current = current.parent
 
-
+# Issue with duplicates added to heap - Jason S
 # A* Algorithm
 def a_star(grid,start,end):
-
+    reset_grid(grid) #reset grid added
     open_set = []
     heapq.heappush(open_set,(0,start))
-
     start.g = 0
     start.f = h(start,end)
-
     closed_set = set()
 
     while open_set:
-
         current = heapq.heappop(open_set)[1]
-
         if current == end:
             reconstruct_path(start,end)
             return True
@@ -89,26 +101,23 @@ def a_star(grid,start,end):
         closed_set.add(current)
 
         for neighbor in current.neighbors:
-
             if neighbor in closed_set:
                 continue
-
             temp_g = current.g + 1
-
             if temp_g < neighbor.g:
-
                 neighbor.parent = current
                 neighbor.g = temp_g
                 neighbor.f = temp_g + h(neighbor,end)
 
                 heapq.heappush(open_set,(neighbor.f,neighbor))
+                # Might have a problem here. tie breaker?
 
                 if neighbor != end:
                     neighbor.color = RED
 
     return False
 
-
+'''
 # Draw grid
 def draw(grid,start,end):
 
@@ -122,10 +131,10 @@ def draw(grid,start,end):
     screen.blit(font.render("END",True,BLACK),(end.x+5,end.y+5))
 
     pygame.display.update()
-
+'''
 
 # Main
-def main():
+'''def main():
 
     grid = [[Node(r,c) for c in range(COLS)] for r in range(ROWS)]
 
@@ -158,7 +167,7 @@ def main():
         draw(grid,start,end)
 
     pygame.quit()
-
-
-if __name__ == "__main__":
-    main()
+'''
+def main():
+    if __name__ == "__main__":
+        main()
