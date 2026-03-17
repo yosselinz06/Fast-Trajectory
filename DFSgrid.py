@@ -18,6 +18,9 @@ sys.setrecursionlimit(100000) #extend recursion depth
 #improve. make stack for proper recursion (iterative version). python standard recursion limit is 1000
 # stack based dfs
 
+#improve: random start/end
+#improve: Tiebreaking
+
 #improve. Make impossible mazes impossible
 
 pygame.init()
@@ -97,7 +100,7 @@ def get_neighbors(grid, node):
     #random.shuffle(neighbors) #randomizes search order. check if needed
 
 # DFS algorithm recursive - Jason S
-def dfs_label(grid, node, force_open=False):
+def dfs_label(grid, node, force_open=False): # implicit stack - resarch more - Jason S
     if node.is_visited:
         return
 
@@ -138,47 +141,164 @@ def draw_grid(screen, grid):
             node.draw(screen)
     pygame.display.flip()
 
+# Make sure start/end have at least 1 open neighbor - Jason S
+def has_move(grid, node):
+    for neighbor in get_neighbors(grid, node):
+        if not neighbor.is_obstacle:
+            return True
+        else:
+            return False
+
+
+    # randomize end - Jason S
+def randomize_grid(grid):
+    loop = True
+    while loop == True:
+        start = grid[random.randint(0, 50)][random.randint(0, 50)]
+        end = grid[random.randint(0, 50)][random.randint(0, 50)]
+
+        while start == end:  # change if to while. randomize again if start and end are same cell - Jason S
+            end = grid[random.randint(0, 50)][random.randint(0, 50)]
+
+        start.is_obstacle = False
+        end.is_obstacle = False
+
+        #man distance - Jason S
+        if abs(start.row - end.row) + abs(start.col - end.col)< 80:
+            continue
+
+        if has_move(grid, start) == True and has_move(grid, end) == True:
+            loop = False
+            start.color = BLUE
+            end.color = GREEN
+
+    return start, end
+
+def run_astar(grid):
+    running = True
+    #start = grid[0][0]
+    # randomize start - Jason S
+    start, end = randomize_grid(grid)
+
+    for row in grid:
+        for node in row:
+            node.update_neighbors(grid)
+
+    found = a_star(grid, start, end)
+
+    if not found:
+        print("No Path. Impossible maze")
+
+    while running:
+        # screen.fill(WHITE)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+        draw_grid(screen, grid)
+        clock.tick(60)
+
+def run_astar_30(grid):
+    start, end = randomize_grid(grid)
+
+    for row in grid:
+        for node in row:
+            node.update_neighbors(grid)
+
+    found = a_star(grid, start, end)
+
+    if not found:
+        print("No Path. Impossible maze")
+    #added
+    screen.fill(WHITE)
+    draw_grid(screen, grid)
+    pygame.display.flip()
+    return screen.copy()
+
+#AI Section --------------------------
+def make_thumbnail(grid, thumb_width, thumb_height):
+    thumb = pygame.Surface((thumb_width, thumb_height))
+    thumb.fill(WHITE)
+
+    cell_w = thumb_width / COLS
+    cell_h = thumb_height / ROWS
+
+    for r in range(ROWS):
+        for c in range(COLS):
+            node = grid[r][c]
+
+            x1 = round(c * cell_w)
+            y1 = round(r * cell_h)
+            x2 = round((c + 1) * cell_w)
+            y2 = round((r + 1) * cell_h)
+
+            pygame.draw.rect(
+                thumb,
+                node.color,
+                (x1, y1, max(1, x2 - x1), max(1, y2 - y1))
+            )
+
+    return thumb
 
 if __name__ == "__main__":
 
     # This creates the screen. pygame.draw uses this as a canvas - Jason S
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("DFS")
-
     clock = pygame.time.Clock()
-    running = True
-
-    grid = create_grid()
-    create_grid_dfs(grid)
 
     option = menu()
     # Run astar - put this before running - Jason S
     if option == 1:
-        start = grid[0][0]
-        start.color = BLUE
-        start.is_obstacle = False
+        grid = create_grid()
+        create_grid_dfs(grid)
+        run_astar(grid)
 
-        end = grid[ROWS - 1][COLS - 1]
-        end.color = GREEN
-        end.is_obstacle = False
+    # run astar x 30
+    if option == 2:
+        col = 6
+        row = 5
+        width = 255
+        height = 255
+        pad = 5 # add padding for cleaner output - Jason S
+        all_output = pygame.Surface((col * width +(col-1) * pad, row * height + (row-1)*pad))
+        all_output.fill(WHITE)
 
-        for row in grid:
-            for node in row:
-                node.update_neighbors(grid)
+        for i in range(30):
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
 
-        found = a_star(grid, start, end)
+            grid = create_grid()
+            create_grid_dfs(grid)
+            #snapshot = run_Astar_30(grid)
+            run_astar_30(grid)
 
-        if not found:
-            print("No Path. Impossible maze")
+            #Scale snapshot
+            #small_snapshot = pygame.transform.scale(snapshot, (width, height))
+            small_snapshot = make_thumbnail(grid, width, height)
 
+            x = (i % col) * (width+pad)
+            y = (i // col) * (height+pad)
+            all_output.blit(small_snapshot, (x, y))  # blit? - Jason S
+            pygame.draw.rect(all_output, BLACK, (x,y,width,height),2)
+
+        pygame.image.save(all_output, "A* Output.png")
+        print("Save success")
+
+        preview = pygame.transform.scale(all_output, (WIDTH, HEIGHT))
+
+        running = True
         while running:
-            #screen.fill(WHITE)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-            draw_grid(screen,grid)
+            screen.fill(WHITE)
+            screen.blit(preview, (0, 0))
+            pygame.display.flip()
             clock.tick(60)
-        pygame.quit()
+
+pygame.quit()
 
 
 
