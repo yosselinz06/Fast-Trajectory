@@ -2,13 +2,21 @@
 import pygame
 import heapq
 
+
+# Class for grid squares
+# object should have [x coord, y coord, g(n), h(n), f(n), parent pointer]
+# Need heap (priority queue) binary
+# Need 2d vector
+# hash table to map keys - Store Visited nodes
+# tuple??
+
 pygame.init()
 
 if __name__ == "__main__":
 
-    ROWS = 5
-    COLS = 5
-    CELL_SIZE = 100
+    ROWS = 51
+    COLS = 51
+    CELL_SIZE = 20
 
     HEIGHT = ROWS * CELL_SIZE
     WIDTH = COLS * CELL_SIZE
@@ -25,6 +33,7 @@ if __name__ == "__main__":
 
     #Text font - Jason S
     font = pygame.font.SysFont(None, 36)
+
 
     clock = pygame.time.Clock()
     running = True
