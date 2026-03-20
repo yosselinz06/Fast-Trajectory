@@ -2,9 +2,10 @@
 #traverse and label 70% open 30% blocked
 import pygame
 import random
-from Astar import a_star #import function a_star from Astar.py
-from Menu import menu
+from astar import a_star #import function a_star from Astar.py
 from backward_astar import backward_a_star
+from Adaptive_astar import a_star_adaptive
+from Menu import menu
 import sys
 sys.setrecursionlimit(100000) #extend recursion depth
 
@@ -71,7 +72,7 @@ class Node:
                 if not grid[r][c].is_obstacle:
                     self.neighbors.append(grid[r][c])
 
-    def __lt__(self, other): #compares both f attributes by using __lt__
+    def __lt__(self, other): #what does this do?
         return self.f < other.f
 
 def create_grid():
@@ -82,16 +83,6 @@ def create_grid():
             grid_row.append(Node(row,col))
         grid.append(grid_row)
     return grid
-
-# Added Code here -------------------
-def reset_grid(grid):
-    for row in grid:
-        for node in row:
-            node.g = float("inf")
-            node.f = float("inf")
-            node.h=0
-            node.parent=None
-# -----------------------------------
 
 def get_neighbors(grid, node):
     neighbors = []
@@ -187,6 +178,7 @@ def randomize_grid(grid):
 
 def run_astar(grid):
     running = True
+    #start = grid[0][0]
     # randomize start - Jason S
     start, end = randomize_grid(grid)
 
@@ -223,25 +215,52 @@ def run_astar_30(grid):
     draw_grid(screen, grid)
     pygame.display.flip()
     return screen.copy()
-#added backward_astar
-def run_backward_astar(grid):
-    start, end = randomize_grid(grid)
 
-    reset_grid(grid)
+def run_astar_back(grid):
+    running = True
+    #start = grid[0][0]
+    # randomize start - Jason S
+    start, end = randomize_grid(grid)
 
     for row in grid:
         for node in row:
             node.update_neighbors(grid)
-    # run backward A*
+
     found = backward_a_star(grid, start, end)
 
     if not found:
-        print("No path. Impossible maze")
+        print("No Path. Impossible maze")
 
-    #to update display
-    screen.fill(WHITE)
-    draw_grid(screen, grid)
-    pygame.display.flip()
+    while running:
+        # screen.fill(WHITE)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+        draw_grid(screen, grid)
+        clock.tick(60)
+
+def run_astar_adaptive(grid):
+    running = True
+    #start = grid[0][0]
+    # randomize start - Jason S
+    start, end = randomize_grid(grid)
+
+    for row in grid:
+        for node in row:
+            node.update_neighbors(grid)
+
+    found = a_star_adaptive(grid, start, end)
+
+    if not found:
+        print("No Path. Impossible maze")
+
+    while running:
+        # screen.fill(WHITE)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+        draw_grid(screen, grid)
+        clock.tick(60)
 
 #AI Section --------------------------
 def make_thumbnail(grid, thumb_width, thumb_height):
@@ -326,17 +345,18 @@ if __name__ == "__main__":
             screen.blit(preview, (0, 0))
             pygame.display.flip()
             clock.tick(60)
-    # run backward A*
+
     if option == 3:
         grid = create_grid()
         create_grid_dfs(grid)
-        run_backward_astar(grid)
+        run_astar_back(grid)
 
-    running = True
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-        clock.tick(60)
+    if option == 4:
+        grid = create_grid()
+        create_grid_dfs(grid)
+        run_astar_adaptive(grid)
 
 pygame.quit()
+
+
+
