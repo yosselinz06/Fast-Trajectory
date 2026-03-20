@@ -87,15 +87,22 @@ def reconstruct_path(start,end):
 def a_star(grid,start,end):
     reset_grid(grid) #reset grid added
     open_set = []
-    heapq.heappush(open_set,(0,start))
+   count = 0 # added counter to fix tie breaking issue
+
     start.g = 0
-    start.f = h(start,end)
+    start.f = h(start, end)
+    heapq.heappush(open_set, (start.f, count, start))
+
     closed_set = set()
 
     while open_set:
-        current = heapq.heappop(open_set)[1]
+        current = heapq.heappop(open_set)[2]
+
+        if current in closed_set:
+            continue
+
         if current == end:
-            reconstruct_path(start,end)
+            reconstruct_path(start, end)
             return True
 
         closed_set.add(current)
@@ -103,19 +110,22 @@ def a_star(grid,start,end):
         for neighbor in current.neighbors:
             if neighbor in closed_set:
                 continue
+
             temp_g = current.g + 1
+
             if temp_g < neighbor.g:
                 neighbor.parent = current
                 neighbor.g = temp_g
-                neighbor.f = temp_g + h(neighbor,end)
+                neighbor.f = temp_g + h(neighbor, end)
 
-                heapq.heappush(open_set,(neighbor.f,neighbor))
-                # Might have a problem here. tie breaker?
+                count += 1 # if 2 nodes have the same f, count goes up by 1
+                heapq.heappush(open_set, (neighbor.f, count, neighbor))
 
                 if neighbor != end:
                     neighbor.color = RED
 
     return False
+
 
 '''
 # Draw grid
