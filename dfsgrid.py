@@ -187,7 +187,6 @@ def randomize_grid(grid):
 
 def run_astar(grid):
     running = True
-    #start = grid[0][0]
     # randomize start - Jason S
     start, end = randomize_grid(grid)
 
