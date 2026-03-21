@@ -9,8 +9,9 @@ GOLD = (255,215,0)
 #def h(a,b):
     #return abs(a.row - b.row) + abs(a.col - b.col)
 # Understand this ---------------------------------------- Jason S
+# Check if node has a heuristic- Use if available, manhatten if not
 def heuristic_adaptive(node, goal):
-    if node.h > 0:
+    if node.h> 0:
         return node.h
     return abs(node.row - goal.row) + abs(node.col - goal.col)
 
@@ -20,7 +21,7 @@ def reset_grid(grid):
         for node in row:
             node.g = float("inf")
             node.f = float("inf")
-            # node.h=0 #Use this for adaptive - Jason S
+            # node.h=0 #Do not Use this for adaptive - Jason S
             node.parent=None
 # -----------------------------------
 

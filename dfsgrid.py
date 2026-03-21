@@ -43,39 +43,41 @@ GREEN = (0, 255, 0)
 
 class Node:
     def __init__(self,row,col):
-        self.row = row
+        self.row = row # cell position
         self.col = col
-        self.x = col * CELL_SIZE
+        self.x = col * CELL_SIZE #coordinates
         self.y = row * CELL_SIZE
         self.color = WHITE
         self.neighbors = []
-        self.g = float("inf")
+        self.g = float("inf") #distance from start
         self.f = float("inf")
-        self.h = 0
+        self.h = 0 #heruistic
         self.parent = None
         self.is_obstacle = False
         self.is_visited = False #Set all cells to unvisited
 
+    # draw node with color and border
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, (self.x, self.y, CELL_SIZE, CELL_SIZE))
         pygame.draw.rect(screen, BLACK, (self.x, self.y, CELL_SIZE, CELL_SIZE), 1)
 
+    #clears/updates neighbor list
     def update_neighbors(self, grid):
         self.neighbors = []
         directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
 
-        for dr, dc in directions:
+        for dr, dc in directions: #check each neighbor
             r = self.row + dr
             c = self.col + dc
 
-            if 0 <= r < ROWS and 0 <= c < COLS:
+            if 0 <= r < ROWS and 0 <= c < COLS: # add if not blocked
                 if not grid[r][c].is_obstacle:
                     self.neighbors.append(grid[r][c])
 
     def __lt__(self, other): #what does this do?
-        return self.f < other.f
+        return self.f < other.f #compares f values - remove?
 
-def create_grid():
+def create_grid(): #create 2d list of node objects  (grid)
     grid = []
     for row in range(ROWS):
         grid_row = []
@@ -84,6 +86,7 @@ def create_grid():
         grid.append(grid_row)
     return grid
 
+#adds neighbors in grid to list.
 def get_neighbors(grid, node):
     neighbors = []
     row = node.row
@@ -103,12 +106,12 @@ def get_neighbors(grid, node):
 
 # DFS algorithm recursive - Jason S
 def dfs_label(grid, node, force_open=False): # implicit stack - resarch more - Jason S
-    if node.is_visited:
+    if node.is_visited: #stop when every node visited
         return
 
-    node.is_visited = True #// fix typo
+    node.is_visited = True #
 
-    if force_open:
+    if force_open: # Force open start
         node.is_obstacle = False
         node.color = WHITE
     else:
@@ -120,13 +123,13 @@ def dfs_label(grid, node, force_open=False): # implicit stack - resarch more - J
         else:
             node.is_obstacle = False
             node.color = WHITE
-
+    #recursive part: set curr to parent and run recursively (parent pointer)
     for neighbor in get_neighbors(grid, node): #problem here? - Jason S
         if not neighbor.is_visited:
             neighbor.parent = node
             dfs_label(grid, neighbor)
 
-
+# Create the actual maze with blocks
 def create_grid_dfs(grid):
     #force cells open
     dfs_label(grid, grid[0][0], force_open=True) #start first cell no block - Jason S
@@ -148,8 +151,7 @@ def has_move(grid, node):
     for neighbor in get_neighbors(grid, node):
         if not neighbor.is_obstacle:
             return True
-        else:
-            return False
+    return False
 
 
     # randomize end - Jason S
@@ -239,20 +241,37 @@ def run_astar_back(grid):
         draw_grid(screen, grid)
         clock.tick(60)
 
-def run_astar_adaptive(grid):
+def run_astar_adaptive(grid, runs):
     running = True
     #start = grid[0][0]
     # randomize start - Jason S
     start, end = randomize_grid(grid)
 
-    for row in grid:
-        for node in row:
-            node.update_neighbors(grid)
+    for i in range(runs): #Pick nw start
+        start = grid[random.randint(0, 50)][random.randint(0, 50)]
+        while start == end or start.is_obstacle:
+            start = grid[random.randint(0, 50)][random.randint(0, 50)]
 
-    found = a_star_adaptive(grid, start, end)
+        for row in grid:
+            for node in row:
+                if node !=end:
+                    if node.is_obstacle:
+                        node.color = BLACK
+                    else:
+                        node.color = WHITE
+        start.color = BLUE
+        end.color = GREEN
 
-    if not found:
-        print("No Path. Impossible maze")
+        for row in grid:
+            for node in row:
+                node.update_neighbors(grid)
+
+        found = a_star_adaptive(grid, start, end)
+        if not found:
+            print("No path")
+
+        draw_grid(screen, grid)
+        pygame.time.delay(1000)
 
     while running:
         # screen.fill(WHITE)
@@ -261,6 +280,9 @@ def run_astar_adaptive(grid):
                 running = False
         draw_grid(screen, grid)
         clock.tick(60)
+
+
+
 
 #AI Section --------------------------
 def make_thumbnail(grid, thumb_width, thumb_height):
@@ -354,7 +376,8 @@ if __name__ == "__main__":
     if option == 4:
         grid = create_grid()
         create_grid_dfs(grid)
-        run_astar_adaptive(grid)
+        searches = 3
+        run_astar_adaptive(grid, searches)
 
 pygame.quit()
 
