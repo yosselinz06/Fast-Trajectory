@@ -2,14 +2,15 @@
 #traverse and label 70% open 30% blocked
 import pygame
 import random
+import time
 from astar import a_star #import function a_star from Astar.py
 from backward_astar import backward_a_star
 from Adaptive_astar import a_star_adaptive
 from Menu import menu
 import sys
-sys.setrecursionlimit(100000) #extend recursion depth
+sys.setrecursionlimit(100000) #extend recursion depth- Not needed, exceeding max ecursion depth was syntax error - Jason S
 
-
+#Notes ------------------------------------------
 # Class for grid squares
 # object should have [x coord, y coord, g(n), h(n), f(n), parent pointer]
 # Need heap (priority queue) binary
@@ -24,6 +25,7 @@ sys.setrecursionlimit(100000) #extend recursion depth
 #improve: Tiebreaking
 
 #improve. Make impossible mazes impossible
+---------------------------------------------------
 
 pygame.init()
 
@@ -249,14 +251,14 @@ def run_astar_adaptive(grid, runs):
 
     for i in range(runs): #Pick nw start
         start = grid[random.randint(0, 50)][random.randint(0, 50)]
-        while start == end or start.is_obstacle:
+        while start == end or start.is_obstacle or abs(start.row - end.row) + abs(start.col - end.col)< 80:
             start = grid[random.randint(0, 50)][random.randint(0, 50)]
 
         for row in grid:
             for node in row:
                 if node !=end:
                     if node.is_obstacle:
-                        node.color = BLACK
+                        node.color =BLACK
                     else:
                         node.color = WHITE
         start.color = BLUE
@@ -266,25 +268,47 @@ def run_astar_adaptive(grid, runs):
             for node in row:
                 node.update_neighbors(grid)
 
+        # Get time of each run - Jason S
+        start_time = time.perf_counter()
+        #visited = a_star_adaptive(grid, start, end)
+        expanded = a_star_adaptive(grid, start, end)
+        end_time = time.perf_counter()
+        total_time = (end_time-start_time) * 1000
+
         found = a_star_adaptive(grid, start, end)
         if not found:
             print("No path")
+        else:
+            print(f"Success! Time: {total_time} ms")
+            #print(f"Nodes visited: {visited} ")
+            print(f"Nodes expanded: {expanded} ")
 
-        draw_grid(screen, grid)
-        pygame.time.delay(1000)
+
+        #draw_grid(screen, grid)
+        #pygame.time.delay(100) Don't use this, need code to refresh screen every run - Jason S
+
+        # Section to refresh screen after each 'run; - Jason S
+        start_time = pygame.time.get_ticks() # get ticks prevents freezing - Jason S
+
+        while pygame.time.get_ticks() - start_time < 5000: # change 1delay to 5 seconds - Jason S
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+            draw_grid(screen, grid)
+            pygame.display.flip()
+            clock.tick(60)
 
     while running:
-        # screen.fill(WHITE)
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            if event.type==pygame.QUIT:
                 running = False
+
         draw_grid(screen, grid)
         clock.tick(60)
 
-
-
-
-#AI Section --------------------------
+#AI Section --------------------------------------------------------------------------
 def make_thumbnail(grid, thumb_width, thumb_height):
     thumb = pygame.Surface((thumb_width, thumb_height))
     thumb.fill(WHITE)
@@ -306,8 +330,9 @@ def make_thumbnail(grid, thumb_width, thumb_height):
                 node.color,
                 (x1, y1, max(1, x2 - x1), max(1, y2 - y1))
             )
-
     return thumb
+ # End AI Section----------------------------------------------------------------------
+
 
 if __name__ == "__main__":
 
@@ -376,8 +401,8 @@ if __name__ == "__main__":
     if option == 4:
         grid = create_grid()
         create_grid_dfs(grid)
-        searches = 3
-        run_astar_adaptive(grid, searches)
+        runs = int(input("Enter numbr of runs: "))
+        run_astar_adaptive(grid, runs)
 
 pygame.quit()
 

@@ -8,7 +8,7 @@ GOLD = (255,215,0)
 # Heuristic
 #def h(a,b):
     #return abs(a.row - b.row) + abs(a.col - b.col)
-# Understand this ---------------------------------------- Jason S
+
 # Check if node has a heuristic- Use if available, manhatten if not
 def heuristic_adaptive(node, goal):
     if node.h> 0:
@@ -36,6 +36,11 @@ def reconstruct_path(start,end):
 # Issue with duplicates added to heap - Jason S
 # A* Algorithm
 def a_star_adaptive(grid,start,end):
+
+    # Section to measure expanded nodes - Jason S
+    expanded = 0
+
+
     reset_grid(grid) #reset grid added
     open_set = []
     heapq.heappush(open_set,(0,start))
@@ -45,12 +50,13 @@ def a_star_adaptive(grid,start,end):
 
     while open_set:
         current = heapq.heappop(open_set)[1]
+        expanded+=1 # Count expanded - Jason S
         if current == end:
             reconstruct_path(start,end)
             goal_cost = end.g # - Research more - Jason S
             for node in closed_set:#--
                 node.h = goal_cost - node.g#--
-            return True
+            return True, expanded
 
         closed_set.add(current)
 
@@ -69,7 +75,7 @@ def a_star_adaptive(grid,start,end):
                 if neighbor != end:
                     neighbor.color = RED
 
-    return False
+    return False, expanded
 
 def main():
     if __name__ == "__main__":
