@@ -76,9 +76,6 @@ class Node:
                 if not grid[r][c].is_obstacle:
                     self.neighbors.append(grid[r][c])
 
-    def __lt__(self, other): #what does this do?
-        return self.f < other.f #compares f values - remove?
-
 def create_grid(): #create 2d list of node objects  (grid)
     grid = []
     for row in range(ROWS):
