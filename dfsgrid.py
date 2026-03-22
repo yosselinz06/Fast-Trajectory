@@ -375,7 +375,7 @@ if __name__ == "__main__":
             all_output.blit(small_snapshot, (x, y))  # blit? - Jason S
             pygame.draw.rect(all_output, BLACK, (x,y,width,height),2)
 
-        pygame.image.save(all_output, "A* Output.png")
+        pygame.image.save(all_output, "a_star Output.png")
         print("Save success")
 
         preview = pygame.transform.scale(all_output, (WIDTH, HEIGHT))
