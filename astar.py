@@ -71,7 +71,3 @@ def a_star(grid,start,end):
 
     return False
 
-# Main
-def main():
-    if __name__ == "__main__":
-        main()
