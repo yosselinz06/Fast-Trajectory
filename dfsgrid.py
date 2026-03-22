@@ -75,6 +75,9 @@ class Node:
             if 0 <= r < ROWS and 0 <= c < COLS: # add if not blocked
                 if not grid[r][c].is_obstacle:
                     self.neighbors.append(grid[r][c])
+     # for adaptive A* only
+    def __lt__(self, other):
+        return self.f < other.f #compares f values
 
 def create_grid(): #create 2d list of node objects  (grid)
     grid = []
