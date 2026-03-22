@@ -1,4 +1,3 @@
-#import pygame
 import heapq
 
 
@@ -8,7 +7,7 @@ GOLD = (255,215,0)
 def h(a,b):
     return abs(a.row - b.row) + abs(a.col - b.col)
 
-# Added Code here -------------------
+# reset grid
 def reset_grid(grid):
     for row in grid:
         for node in row:
@@ -16,7 +15,6 @@ def reset_grid(grid):
             node.f = float("inf")
             node.h=0
             node.parent=None
-# -----------------------------------
 
 
 # Path reconstruction
@@ -26,18 +24,28 @@ def reconstruct_path(start,end):
         current.color = GOLD
         current = current.parent
 
-# Issue with duplicates added to heap - Jason S
+
 # A* Algorithm
 def a_star(grid,start,end):
     reset_grid(grid) #reset grid added
     open_set = []
-    heapq.heappush(open_set,(0,start))
+   
     start.g = 0
     start.f = h(start,end)
     closed_set = set()
+    count = 0
+
+    #if same f value, will take largest g
+    heapq.heappush(open_set, (start.f, -start.g, count, start))
+    count += 1
 
     while open_set:
-        current = heapq.heappop(open_set)[1]
+        current = heapq.heappop(open_set)[3]
+
+        #skips nodes that have already been explored and processed
+        if current in closed_set:
+            continue
+
         if current == end:
             reconstruct_path(start,end)
             return True
@@ -47,22 +55,21 @@ def a_star(grid,start,end):
         for neighbor in current.neighbors:
             if neighbor in closed_set:
                 continue
+
             temp_g = current.g + 1
+
             if temp_g < neighbor.g:
                 neighbor.parent = current
                 neighbor.g = temp_g
-                neighbor.f = temp_g + h(neighbor,end)
+                neighbor.f = neighbor.g + h(neighbor,end)
 
-                heapq.heappush(open_set,(neighbor.f,neighbor))
-                # Might have a problem here. tie breaker?
+                heapq.heappush(open_set,(neighbor.f,-neighbor.g, count, neighbor))
+                count += 1
 
                 if neighbor != end:
                     neighbor.color = RED
 
     return False
-
-
-
 
 # Main
 def main():
