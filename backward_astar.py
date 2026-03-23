@@ -1,4 +1,5 @@
 import heapq
+import time
 
 # Colors
 RED   = (255,0,0)
@@ -28,16 +29,19 @@ def reconstruct_path(start,end):
 def backward_a_star(grid,start,end):
     reset_grid(grid) #reset grid added
 
+    start_time = time.perf_counter()
+
     open_set = []
     closed_set = set()
     count = 0
+    expanded = 0
 
     #search starts from end
     end.g = 0
     end.f = h(end,start)
     heapq.heappush(open_set, (end.f, -end.g, count, end))  # start from end node
     count += 1
-    
+
 
     while open_set:
         current = heapq.heappop(open_set)[3]
@@ -47,9 +51,11 @@ def backward_a_star(grid,start,end):
 
         if current == start:
             reconstruct_path(end, start) # reconstruct path backwards
-            return True
+            end_time = time.perf_counter()
+            return True, expanded, end_time - start_time
 
         closed_set.add(current)
+        expanded += 1
 
         for neighbor in current.neighbors:
             if neighbor in closed_set:
@@ -67,5 +73,5 @@ def backward_a_star(grid,start,end):
 
                 if neighbor != end and neighbor != start:
                     neighbor.color = RED
-
-    return False
+    end_time = time.perf_counter()
+    return False, expanded, end_time - start_time
