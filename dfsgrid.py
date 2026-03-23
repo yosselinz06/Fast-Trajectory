@@ -3,7 +3,7 @@
 import pygame
 import random
 import time
-from astar import a_star #import function a_star from Astar.py
+from Astar import a_star #import function a_star from Astar.py
 from backward_astar import backward_a_star
 from Adaptive_astar import a_star_adaptive
 from Menu import menu
@@ -16,7 +16,6 @@ sys.setrecursionlimit(100000) #extend recursion depth- Not needed, exceeding max
 # Need heap (priority queue) binary
 # Need 2d vector
 # hash table to map keys - Store Visited nodes
-# tuple??
 
 #improve. make stack for proper recursion (iterative version). python standard recursion limit is 1000
 # stack based dfs
@@ -25,7 +24,7 @@ sys.setrecursionlimit(100000) #extend recursion depth- Not needed, exceeding max
 #improve: Tiebreaking
 
 #improve. Make impossible mazes impossible
----------------------------------------------------
+#--------------------------------------------------
 
 pygame.init()
 
@@ -75,9 +74,9 @@ class Node:
             if 0 <= r < ROWS and 0 <= c < COLS: # add if not blocked
                 if not grid[r][c].is_obstacle:
                     self.neighbors.append(grid[r][c])
-     # for adaptive A* only
+    # for adaptive A* only
     def __lt__(self, other):
-        return self.f < other.f #compares f values
+        return self.f < other.f  # compares f values - remove?
 
 def create_grid(): #create 2d list of node objects  (grid)
     grid = []
@@ -182,15 +181,19 @@ def randomize_grid(grid):
 
 def run_astar(grid):
     running = True
-    #start = grid[0][0]
-    # randomize start - Jason S
+
+    # randomize start
     start, end = randomize_grid(grid)
 
     for row in grid:
         for node in row:
             node.update_neighbors(grid)
 
-    found = a_star(grid, start, end)
+    found, expanded, runtime = a_star(grid, start, end)
+
+    #print results
+    print(f"Expanded nodes: {expanded}")
+    print(f"Runtime: {runtime:.6f}seconds")
 
     if not found:
         print("No Path. Impossible maze")
@@ -230,7 +233,9 @@ def run_astar_back(grid):
         for node in row:
             node.update_neighbors(grid)
 
-    found = backward_a_star(grid, start, end)
+    found, expanded, runtime = backward_a_star(grid, start, end)
+    print(f"Expanded nodes: {expanded}")
+    print(f"Runtime: {runtime:.6f}seconds")
 
     if not found:
         print("No Path. Impossible maze")
@@ -401,10 +406,7 @@ if __name__ == "__main__":
     if option == 4:
         grid = create_grid()
         create_grid_dfs(grid)
-        runs = int(input("Enter numbr of runs: "))
+        runs = int(input("Enter number of runs: "))
         run_astar_adaptive(grid, runs)
 
 pygame.quit()
-
-
-
