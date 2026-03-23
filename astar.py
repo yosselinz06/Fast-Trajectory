@@ -1,5 +1,5 @@
 import heapq
-
+import time
 
 RED = (255,0,0)
 GOLD = (255,215,0)
@@ -29,11 +29,14 @@ def reconstruct_path(start,end):
 def a_star(grid,start,end):
     reset_grid(grid) #reset grid added
     open_set = []
-   
+
+    start_time = time.perf_counter()  # start timer
+
     start.g = 0
     start.f = h(start,end)
     closed_set = set()
     count = 0
+    expanded = 0 #count expanded nodes
 
     #if same f value, will take largest g
     heapq.heappush(open_set, (start.f, -start.g, count, start))
@@ -48,9 +51,11 @@ def a_star(grid,start,end):
 
         if current == end:
             reconstruct_path(start,end)
-            return True
+            end_time = time.perf_counter()
+            return True, expanded, end_time - start_time
 
         closed_set.add(current)
+        expanded += 1 #counting expanded nodes
 
         for neighbor in current.neighbors:
             if neighbor in closed_set:
@@ -69,5 +74,5 @@ def a_star(grid,start,end):
                 if neighbor != end:
                     neighbor.color = RED
 
-    return False
-
+    end_time = time.perf_counter()
+    return False, expanded, end_time - start_time
